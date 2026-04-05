@@ -1,0 +1,152 @@
+# Data Pipeline Configuration
+
+Central configuration for all data sources and feeds.
+
+## Sports Coverage
+
+```yaml
+sports:
+  nba:
+    enabled: true
+    scrape_frequency: "daily"
+    data_sources:
+      - nba_api
+      - basketball_reference
+    agents:
+      - nba-specialist-01
+      - nba-specialist-02
+    
+  ufc:
+    enabled: true
+    scrape_frequency: "event_based"
+    data_sources:
+      - ufc_api
+      - tapology
+    agents:
+      - ufc-specialist-01
+      - ufc-specialist-02
+      
+  afl:
+    enabled: true
+    scrape_frequency: "daily"
+    data_sources:
+      - afl_api
+      - footywire
+    agents:
+      - afl-specialist-01
+      - afl-specialist-02
+      
+  nrl:
+    enabled: true
+    scrape_frequency: "daily"
+    data_sources:
+      - nrl_api
+    agents:
+      - nrl-specialist-01
+      - nrl-specialist-02
+      
+  racing:
+    enabled: true
+    scrape_frequency: "daily"
+    data_sources:
+      - racing_api
+      - form_guide_scraper
+    agents:
+      - racing-form-analyst
+      - racing-track-analyst
+      - racing-tempo-analyst
+      - racing-market-analyst
+      
+  greyhounds:
+    enabled: true
+    scrape_frequency: "daily"
+    data_sources:
+      - greyhound_api
+    agents:
+      - greyhound-specialist
+      
+  nfl:
+    enabled: true
+    scrape_frequency: "weekly"
+    data_sources:
+      - nfl_api
+    agents:
+      - nfl-specialist
+      
+  soccer:
+    enabled: true
+    scrape_frequency: "daily"
+    data_sources:
+      - football_api
+    agents:
+      - soccer-specialist
+```
+
+## Agent Configuration
+
+```yaml
+agents:
+  core:
+    max_daily_events: 20
+    output_schema: "agent-output-v1"
+    confidence_threshold: 0.60
+    
+  supervisor:
+    input_sources: "all_core_agents"
+    consensus_method: "weighted_average"
+    conflict_resolution: "chief_review"
+    
+  consensus:
+    min_agents: 3
+    min_confidence: 0.65
+    output_format: "final-prediction"
+    
+  chief:
+    override_authority: true
+    approval_required: true
+```
+
+## Data Source Credentials
+
+```yaml
+# Store in environment variables or secrets manager
+# DO NOT commit actual credentials
+
+data_sources:
+  nba_api:
+    base_url: "https://stats.nba.com"
+    rate_limit: 1  # requests per second
+    
+  ufc_api:
+    base_url: "https://api.ufc.com"
+    
+  racing_api:
+    base_url: "https://api.racing.com"
+    
+  # Add others as needed
+```
+
+## Pipeline Schedule
+
+```yaml
+schedule:
+  daily_6am:
+    - scrape_nba
+    - scrape_afl
+    - scrape_nrl
+    - scrape_soccer
+    - generate_prediction_packs
+    
+  daily_10am:
+    - scrape_racing
+    - scrape_greyhounds
+    - generate_racing_packs
+    
+  event_based:
+    - scrape_ufc
+    - scrape_nfl
+    
+  hourly:
+    - update_market_odds
+    - check_injury_reports
+```

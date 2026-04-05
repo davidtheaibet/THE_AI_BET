@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AIbet Prediction Pack",
+  "description": "Universal prediction format for all sports and racing",
+  "type": "object",
+  "required": ["pack_id", "sport", "events", "generated_at"],
+  "properties": {
+    "pack_id": {
+      "type": "string",
+      "description": "Unique identifier: {sport}_{YYYYMMDD}_{version}"
+    },
+    "sport": {
+      "type": "string",
+      "enum": ["nba", "ufc", "afl", "nrl", "racing", "greyhounds", "nfl", "soccer"]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_sources": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/event"
+      }
+    }
+  },
+  "definitions": {
+    "event": {
+      "type": "object",
+      "required": ["event_id", "event_type", "datetime", "participants"],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "description": "Unique event identifier"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": ["game", "fight", "match", "race"]
+        },
+        "datetime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "venue": {
+          "type": "string"
+        },
+        "broadcast": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "participants": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/definitions/participant"
+          }
+        },
+        "market_odds": {
+          "type": "object",
+          "properties": {
+            "source": {"type": "string"},
+            "updated_at": {"type": "string", "format": "date-time"},
+            "markets": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/market"
+              }
+            }
+          }
+        },
+        "model_predictions": {
+          "$ref": "#/definitions/predictions"
+        },
+        "situational_factors": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "injuries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "player": {"type": "string"},
+              "status": {"enum": ["out", "doubtful", "questionable", "probable"]},
+              "impact": {"type": "number", "minimum": 0, "maximum": 1}
+            }
+          }
+        },
+        "weather": {
+          "type": "object",
+          "properties": {
+            "condition": {"type": "string"},
+            "temperature": {"type": "number"},
+            "wind": {"type": "number"}
+          }
+        }
+      }
+    },
+    "participant": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "type": {"enum": ["team", "player", "fighter", "horse", "greyhound"]},
+        "ranking": {"type": "number"},
+        "recent_form": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "stats": {
+          "type": "object",
+          "description": "Sport-specific statistics"
+        },
+        "model_rating": {"type": "number"}
+      }
+    },
+    "market": {
+      "type": "object",
+      "properties": {
+        "market_type": {
+          "enum": ["moneyline", "spread", "total", "prop", "exacta", "quinella", "trifecta"]
+        },
+        "selection": {"type": "string"},
+        "line": {"type": "number"},
+        "odds": {"type": "number"},
+        "implied_prob": {"type": "number"}
+      }
+    },
+    "predictions": {
+      "type": "object",
+      "properties": {
+        "winner": {
+          "type": "object",
+          "properties": {
+            "selection": {"type": "string"},
+            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+            "edge": {"type": "number"},
+            "reasoning": {"type": "string"}
+          }
+        },
+        "spread": {
+          "type": "object",
+          "properties": {
+            "line": {"type": "number"},
+            "lean": {"type": "string"},
+            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+            "projected_margin": {"type": "number"}
+          }
+        },
+        "total": {
+          "type": "object",
+          "properties": {
+            "line": {"type": "number"},
+            "lean": {"enum": ["over", "under"]},
+            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+            "projected_total": {"type": "number"}
+          }
+        },
+        "props": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "player": {"type": "string"},
+              "prop_type": {"type": "string"},
+              "line": {"type": "number"},
+              "lean": {"enum": ["over", "under"]},
+              "confidence": {"type": "number"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
